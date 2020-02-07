@@ -23,15 +23,51 @@ Object.prototype.isEmpty = function() {
     return true;
 }
 
-Object.prototype.toClass = function(classType){
-	if(!classType || typeof(classType) != 'function' || !classType.prototype.constructor){ return new Object();}
-	var objClass = new classType();
+Object.prototype.toPrototype = function(targetPrototype){
+	if(!targetPrototype || typeof(targetPrototype) != 'object' || !targetPrototype.constructor){ return new Object();}
+	var sourceObject = this;
+	var targetObject = new Object();
+
+	try{targetObject = new targetPrototype.constructor();}catch(error){console.warn(error);try{targetObject = new targetPrototype.constructor({});}catch(e){console.error(e);}}
+
 	if(this.isEmpty()){return objClass;}
-	for(var eachItem in objClass)
+
+	for(var item in targetObject)
     {
-        objClass[eachItem] = this[eachItem] || objClass[eachItem];
+        (sourceObject[item] || typeof(sourceObject[item]) == 'boolean') && (targetObject[item] = sourceObject[item]);
     }
-	return objClass;
+
+	return targetObject;
 }
 
 
+function dynamicSort(property, isAsc = true) {
+    var sortOrder = isAsc ? 1 : -1;
+    return function (a,b) {
+        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+        return result * sortOrder;
+    }
+}
+function sortArrayOfObjects(arrayOfObjects, searchOn){
+	return arrayOfObjects.sort(dynamicSort(searchOn));
+}
+
+//
+if (!Array.prototype.sortObjects) {
+    Object.defineProperty(Array.prototype, 'sortObjects', {
+        value: (function () {
+            function dynamicSort(property, isAsc) {
+                var sortOrder = (isAsc || isAsc === undefined) ? 1 : -1;
+                return function (a, b) {
+                    var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+                    return result * sortOrder;
+                }
+            }
+
+            return function (searchOn, isAsc) {
+                var arrayOfObjects =  Array.from(this);
+                return arrayOfObjects.sort(dynamicSort(searchOn, isAsc));
+            }
+        })()
+    });
+}
