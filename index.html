@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+
+<h1>This is a Heading</h1>
+<p>This is a paragraph.</p>
+
+<button id="btnThrottling">Throttling 
+</button>
+<br/><br/>
+
+<button id="btnDebouncing">Debouncing 
+</button>
+
+
+<script>
+const debounce = (fn, delay) => {	
+    let timerId;
+    return (...args) => {
+		console.log('debounce clicked');
+        if (timerId) {
+            clearTimeout(timerId);
+        }
+        timerId = setTimeout(() => {
+            fn(...args);
+        }, delay);
+    }
+}
+
+
+document.getElementById("btnDebouncing").addEventListener("click", debounce(() => {
+    console.log("click debounced");
+}, 2000));
+
+
+
+const throttle = (fn, delay) => {
+	
+    let lastRunTime;
+    return (...args) => {
+		console.log('throttle clicked');
+        const now = new Date().getTime();
+        if (now - lastRunTime < delay) {
+            return;
+        }
+        lastRunTime = now;
+        return fn(...args);
+    }
+}
+
+
+document.getElementById("btnThrottling").addEventListener("click", throttle(() => {
+    console.log("click throttled");
+}, 2000));
+</script>
+</body>
+</html>
